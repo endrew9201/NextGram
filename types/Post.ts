@@ -1,4 +1,7 @@
-import { Like, User } from "@prisma/client/edge";
+
+import { Like } from './Like';
+import { Comment } from './Comment';
+import { User } from './User';
 
 export interface Post {
     id: string;

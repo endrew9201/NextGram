@@ -1,32 +1,41 @@
-import type { NextAuthConfig } from "next-auth";
-import NextAuth from "next-auth";
+import type { NextAuthConfig } from 'next-auth';
+import NextAuth from 'next-auth';
 
-import Google from "next-auth/providers/google";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
+import Google from 'next-auth/providers/google';
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 const config = {
-    adapter: PrismaAdapter(prisma),
-    session: { strategy: 'jwt'},
-    providers: [Google],
-    callbacks: {
-        authorized({request, auth}){
-            const { pathname } = request.nextUrl;
+  adapter: PrismaAdapter(prisma),
+  session: { strategy: 'jwt' },
+  providers: [Google],
+  callbacks: {
+    session({ session, token }) {
+      if (token.sub) session.user.userid = token.sub;
+      return session;
+    },
+  },
+  pages: {
+    signIn: '/signIn',
+  },
+} satisfies NextAuthConfig; /*  */
 
-            if(pathname === "/middleware"){
-                return !!auth;
-            }
-            return true;
-        },
-    }
-} satisfies NextAuthConfig;/*  */
+export const { handlers, auth, signIn, signOut } = NextAuth(config);
 
-export const {handlers, auth, signIn, signOut} = NextAuth(config)
+//Providers => Minha página
 
+interface ProviderWithId {
+  id: string;
+  name: string;
+}
 
-//D do cliente:
-//40672959356-rb9eio0d6nrjo8t6st30bufo0sn49of7.apps.googleusercontent.com
-//Chave secreta do cliente:
-//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
+//mapear os providers
+export const providerMap = config.providers.map((provider) => {
+  const typedProvider = provider as unknown as ProviderWithId;
+  return {
+    id: typedProvider.id,
+    name: typedProvider.name,
+  };
+});
