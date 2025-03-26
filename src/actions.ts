@@ -80,6 +80,7 @@ export async function updateUserProfile(
 }
 
 //Criar postagem
+
 export async function createPost(
   formState: FormState,
   formData: FormData,
@@ -111,6 +112,8 @@ export async function createPost(
 
   const imageUrl = `/uploads/${imageFile.name}`;
 
+  console.log('Session user:', session.user);
+
   await prisma.post.create({
     data: {
       imageUrl,
@@ -122,4 +125,29 @@ export async function createPost(
   revalidatePath('/');
 
   redirect('/');
+}
+
+// Resgatar posts de um usuário
+
+export async function getUserPosts(userId: string){
+  const session = await auth();
+
+  if(!session) redirect('/');
+
+  if(session.user.userId !== userId){
+    throw new Error('Não autorizado');
+  }
+
+  return await prisma.post.findMany({
+    where: { userId },
+    include: {
+      user: true,
+      likes: true,
+      comments: true,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+    
 }

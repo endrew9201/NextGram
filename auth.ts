@@ -13,7 +13,7 @@ const config = {
   providers: [Google],
   callbacks: {
     session({ session, token }) {
-      if (token.sub) session.user.userid = token.sub;
+      if (token.sub) session.user.userId = token.sub;
       return session;
     },
   },
