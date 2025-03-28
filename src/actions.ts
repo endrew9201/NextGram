@@ -15,6 +15,18 @@ type FormState = {
   type: string;
 };
 
+//functionCheckingUserSession
+
+export async function checkUserAuthorization(userId: string) {
+  const session = await auth();
+
+  if (!session) redirect("/");
+
+  if (session.user.userId !== userId) {
+    throw new Error('Nao autorizado');
+  }
+}
+
 //resgatar o usuário por email
 
 export async function GetUserByEmail(
@@ -129,12 +141,12 @@ export async function createPost(
 
 // Resgatar posts de um usuário
 
-export async function getUserPosts(userId: string){
+export async function getUserPosts(userId: string) {
   const session = await auth();
 
-  if(!session) redirect('/');
+  if (!session) redirect('/');
 
-  if(session.user.userId !== userId){
+  if (session.user.userId !== userId) {
     throw new Error('Não autorizado');
   }
 
@@ -149,5 +161,103 @@ export async function getUserPosts(userId: string){
       createdAt: 'desc',
     },
   });
-    
+}
+
+//Deletar postagens
+
+export async function deletePost(formData: FormData) {
+  const session = await auth();
+
+  if (!session) redirect('/');
+
+  const userId = formData.get('userId') as string;
+  const postId = formData.get('postId') as string;
+
+  if (session.user.userId !== userId) {
+    throw new Error('Não autorizado');
+  }
+
+  await prisma.post.delete({
+    where: { id: postId },
+  });
+
+  revalidatePath('/myPosts');
+  redirect('/myPosts');
+}
+
+// resgatar postagem pelo id
+
+export async function getAllPosts() {
+  return await prisma.post.findMany({
+    include: {
+      user: true,
+      likes: true,
+      comments: {
+        include: {
+          user: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+}
+
+//Like do post
+
+export async function likePost(postId: string, userId: string) {
+  const session = await auth();
+
+  if (!session) {
+    redirect('/');
+  }
+
+  //Verifica se o like existe
+
+  const existingLike = await prisma.like.findFirst({
+    where: {
+      postId,
+      userId,
+    },
+  });
+  if (existingLike) {
+    await prisma.like.delete({
+      where: {
+        id: existingLike.id,
+      },
+    });
+  } else {
+    await prisma.like.create({
+      data: {
+        postId,
+        userId,
+      },
+    });
+  }
+
+  revalidatePath('/');
+
+  return { message: 'Perfil atualizado com sucesso!', type: 'sucess' };
+}
+
+//criar comentario no post
+export async function addComment(
+  postId: string,
+  userId: string,
+  content: string,
+) {
+  const session = await auth();
+
+  if (!session) redirect('/');
+
+  await prisma.comment.create({
+    data: {
+      content,
+      postId,
+      userId,
+    },
+  });
+
+  revalidatePath('/');
 }

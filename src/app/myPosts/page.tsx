@@ -1,4 +1,4 @@
-import { getUserPosts } from '@/actions';
+import { deletePost, getUserPosts } from '@/actions';
 import Button from '@/components/Button';
 import ButtonLink from '@/components/ButtonLink';
 import { auth } from 'auth';
@@ -35,19 +35,19 @@ const MyPostspage: React.FC = async () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {posts.map((post) => (
-            <div key={post.id} className="border rounded p-4 shadow-sm">
+            <div key={post.id} className="border rounded-xl p-4 shadow-sm">
               <Image
                 src={post.imageUrl}
                 alt={post.caption || 'imagem do post'}
-                className="w-[366px] h-[218px] mb-4"
+                className="w-[366px] h-[218px] mb-4 rounded-xl"
                 width={366}
                 height={218}
               />
               {post.caption && (
                 <p className='mb-2 text-sm font-medium'>{post.caption}</p>
               )}
-              <form>
-                <input type="hidden" name='useId' value={post.id}/>
+              <form action={deletePost}>
+                <input type="hidden" name='userId' value={userId}/>
                 <input type="hidden" name="postId" value={post.id}/>
                 <div className='flex justify-end'>
                   <Button text='Excluir' type='submit' danger={true}/>

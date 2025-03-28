@@ -81,7 +81,7 @@ const MobileMenu = ({ user, onSignOut }: MobileMenuProps) => {
                   onSignOut();
                   setIsOpen(false);
                 }}
-                className="w-full text-left py-2 text-red-500 hover:text-red-400"
+                className="cursor-pointer w-full text-left py-2 text-red-500 hover:text-red-400"
               >
                 Sair
               </button>
