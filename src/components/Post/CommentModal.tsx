@@ -61,7 +61,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
       onRequestClose={onRequestClose}
       contentLabel="Comentários"
       ariaHideApp={false}
-      className="w-[704px] mt-28 mx-auto bg-white rounded border border-zinc-300"
+      className="w-[704px] mt-28 mx-auto bg-white rounded border border-zinc-300 overflow-y-auto max-h-[80vh]"
     >
       <div className="p-4">
         <div className="flex justify-between itemns-center">
